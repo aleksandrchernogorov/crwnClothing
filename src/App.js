@@ -5,6 +5,7 @@ import { Route, Switch } from 'react-router-dom';
 import ShopPage from './pages/shop/shop.component';
 import Header from './components/header/header.component';
 import SignInPage from './pages/sign-in-page/sign-in-page.component';
+import { auth } from './firebase/firebase.utils';
 
 const HatsPage = () => (
   <div>
@@ -12,17 +13,40 @@ const HatsPage = () => (
   </div>
 )
 
-function App() {
-  return (
-    <div>
-      <Header />
-      <Switch>
-        <Route exact path="/" component={HomePage} />
-        <Route path="/shop" component={ShopPage} />
-        <Route path="/signin" component={SignInPage} />
-      </Switch>
-    </div>
-  );
+class App extends React.Component {
+  constructor() {
+    super();
+
+    this.state = {
+      currentUser: null
+    }
+  }
+
+  unsibscribeFromAuth = null;
+
+  componentDidMount() {
+    this.unsibscribeFromAuth = auth.onAuthStateChanged(user => {
+      this.setState({currentUser: user});
+      console.log(user);
+    })
+  };
+
+  componentWillUnmount() {
+    this.unsibscribeFromAuth();
+  }
+
+  render() { 
+    return (
+      <div>
+        <Header currentUser={this.state.currentUser} />
+        <Switch>
+          <Route exact path="/" component={HomePage} />
+          <Route path="/shop" component={ShopPage} />
+          <Route path="/signin" component={SignInPage} />
+        </Switch>
+      </div>
+    );
+  }
 }
 
 export default App;
